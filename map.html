@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wildlife Monitoring Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Wildlife Monitoring Map</h1>
+    <div id="map"></div>
+    <script>
+        const gunImageData = [
+            {
+                "Confidence Score": 1.0,
+                "Detection": "Gun Detected",
+                "Sensor Name": "Sensor 1"
+            },
+            {
+                "Confidence Score": 0.96,
+                "Detection": "Gun Detected",
+                "Sensor Name": "Sensor 2"
+            },
+            {
+                "Confidence Score": 0.0,
+                "Detection": "No Gun Detected",
+                "Sensor Name": "Sensor 3"
+            },
+            {
+                "Confidence Score": 0.0,
+                "Detection": "No Gun Detected",
+                "Sensor Name": "Sensor 4"
+            }
+        ];
+
+        function createGunshotMap(gunshotData, gunImageData) {
+            const gunshotMap = {};
+            gunshotData.forEach(data => {
+                const isGunshotSoundDetected = data.Result === "Gunshot detected";
+                const gunImageDetection = gunImageData.find(result => result['Sensor Name'] === data.Sensor);
+                const isGunshotImageDetected = gunImageDetection && gunImageDetection.Detection === "Gun Detected";
+                gunshotMap[data.Sensor] = isGunshotSoundDetected || isGunshotImageDetected;
+            });
+            return gunshotMap;
+        }
+
+        var map = L.map('map').setView([19.2208, 72.8543], 12);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var locations = [
+            { id: 1, lat: 19.1988, lng: 72.9207, name: "Data Source 1" },
+            { id: 2, lat: 19.2346, lng: 72.8747, name: "Data Source 2" },
+            { id: 3, lat: 19.1649, lng: 72.9054, name: "Data Source 3" },
+            { id: 4, lat: 19.2554, lng: 72.9149, name: "Data Source 4" }
+        ];
+        var blueIcon = L.divIcon({
+            className: 'blue-icon',
+            html: '<img src="./Marker/blueicon.png" width="20" height="20" />',
+            iconSize: [25, 25]
+        });
+        var redIcon = L.divIcon({
+            className: 'blue-icon',
+            html: '<img src="./Marker/redicon.png" width="20" height="20" />',
+            iconSize: [25, 25]
+        });
+        var greenIcon = L.divIcon({
+            className: 'blue-icon',
+            html: '<img src="./Marker/greenicon.png" width="20" height="20" />',
+            iconSize: [25, 25]
+        });
+
+        locations.forEach(location => {
+            var marker = L.marker([location.lat, location.lng], { icon: blueIcon }).addTo(map);
+            marker.bindPopup(`<b>${location.name}</b><br>Status: On Standby`);
+            location.marker = marker;
+        });
+
+        function getAnimalDetected(sensorId, predictions) {
+            var prediction = predictions.find(pred => `sensor ${sensorId}.png` === pred[0]);
+            if (prediction) {
+                return `${prediction[1]} detected with confidence: ${prediction[2]}`;
+            }
+            return "No detection";
+        }
+
+        function fetchPredictionData() {
+            fetch('http://127.0.0.1:8000/run-detect')
+                .then(response => response.json())
+                .then(data => {
+                    var predictions = data.predictions;
+                    fetchGunshotDetection(predictions);
+                })
+                .catch(error => {
+                    console.error('Error fetching prediction data:', error);
+                });
+        }
+
+        function fetchGunshotDetection(predictions) {
+            fetch('http://127.0.0.1:5000/gunshot_detect')
+                .then(response => response.json())
+                .then(data => {
+                    fetchGunImageDetection(predictions, data);
+                })
+                .catch(error => {
+                    console.error('Error fetching gunshot detection data:', error);
+                });
+        }
+
+        function fetchGunImageDetection(predictions, gunshotData) {
+            fetch('http://127.0.0.1:8000/gun_test')
+                .then(response => response.json())
+                .then(data => {
+                    const gunshotStatusMap = createGunshotMap(gunshotData, gunImageData);
+                    locations.forEach(location => {
+                        var animalInfo = getAnimalDetected(location.id, predictions);
+                        var marker = location.marker;
+                        if (gunshotStatusMap[`Sensor ${location.id}`]) {
+                            marker.setIcon(redIcon);
+                        }
+                        marker.bindPopup(`
+                            <b>${location.name}</b><br>
+                            Status: ${gunshotStatusMap[`Sensor ${location.id}`] ? "Gunshot detected" : "On Standby"}<br>
+                            Gun Detection: ${gunshotStatusMap[`Sensor ${location.id}`]}<br>
+                            ${animalInfo}
+                        `);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching gun image detection data:', error);
+                });
+        }
+
+        fetchPredictionData();
+
+        map.on('click', function(e) {
+            console.log("Clicked at coordinates: ", e.latlng.lat, e.latlng.lng);
+        });
+
+    </script>
+</body>
+</html>
