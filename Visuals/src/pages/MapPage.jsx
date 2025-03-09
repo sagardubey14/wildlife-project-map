@@ -1,34 +1,34 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-// import { useAuth } from "@/hooks/use-auth";
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+import Map from "./Map/Map";
 
 export default function MapPage() {
-//   const { user } = useAuth();
-    const user = 'admin';
+  const user = "admin";
   const [isLoading, setIsLoading] = useState(true);
 
-  // Simulate loading for 10 seconds
+  const position = [19.22882507715023, 72.93651580810548];
+  const zoomLevel = 13;
+
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 10000);
+    const timer = setTimeout(() => setIsLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
 
-  // Static detections for now
-  const detections = [
-    {
-      id: 1,
-      type: "wildlife",
-      description: "Elephant spotted near riverbank",
-      timestamp: new Date().toISOString(),
-    },
-    {
-      id: 2,
-      type: "threat",
-      description: "Gunshot detected in sector 3",
-      timestamp: new Date().toISOString(),
-    },
+  const locations = [
+    { id: 1, lat: 19.1988, lng: 72.9207, name: "Data Source 1" },
+    { id: 2, lat: 19.2346, lng: 72.8747, name: "Data Source 2" },
+    { id: 3, lat: 19.1649, lng: 72.9054, name: "Data Source 3" },
+    { id: 4, lat: 19.2554, lng: 72.9149, name: "Data Source 4" }
   ];
+
+  const handleMapClick = (e) => {
+    // Store clicked position
+    const { lat, lng } = e.latlng;
+    console.log(lat, lng);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -47,47 +47,8 @@ export default function MapPage() {
               ) : (
                 <div className="space-y-4">
                   <div className="h-[600px] bg-muted rounded-lg flex items-center justify-center">
-                    <p className="text-muted-foreground">
-                      Map visualization will be implemented here
-                    </p>
+                    <Map position={position} zoomLevel={zoomLevel} locations={locations} />
                   </div>
-
-                  {user?.role === "admin" && (
-                    <div className="space-y-2">
-                      <h2 className="text-xl font-semibold">Recent Detections</h2>
-                      <div className="space-y-2">
-                        {detections.map((detection) => (
-                          <div
-                            key={detection.id}
-                            className={`p-4 rounded-lg flex justify-between ${
-                              detection.type === "threat"
-                                ? "bg-destructive/10 text-destructive"
-                                : "bg-muted"
-                            }`}
-                          >
-                            <div>
-                              <p className="font-medium">
-                                {detection.type === "threat" && "⚠️ "}
-                                {detection.type}
-                              </p>
-                              <p
-                                className={`text-sm ${
-                                  detection.type === "threat"
-                                    ? "text-destructive/80"
-                                    : "text-muted-foreground"
-                                }`}
-                              >
-                                {detection.description}
-                              </p>
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              {new Date(detection.timestamp).toLocaleString()}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
             </CardContent>

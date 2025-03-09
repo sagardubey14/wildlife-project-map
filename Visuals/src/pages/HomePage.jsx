@@ -51,6 +51,7 @@ export default function HomePage() {
                 src="/images/home4.jpeg"
                 alt="Wildlife monitoring"
                 className="w-full h-48 object-cover rounded-lg mb-4"
+               loading="lazy"
               />
               <h2 className="text-xl font-semibold mb-2">Wildlife Monitoring</h2>
               <p className="text-muted-foreground mb-4">
@@ -68,6 +69,7 @@ export default function HomePage() {
                 src="/images/home5.jpeg"
                 alt="Conservation efforts"
                 className="w-full h-48 object-cover rounded-lg mb-4"
+                loading="lazy"
               />
               <h2 className="text-xl font-semibold mb-2">Conservation Efforts</h2>
               <p className="text-muted-foreground mb-4">
@@ -85,6 +87,7 @@ export default function HomePage() {
                 src="/images/home6.jpeg"
                 alt="Research initiatives"
                 className="w-full h-48 object-cover rounded-lg mb-4"
+                loading="lazy"
               />
               <h2 className="text-xl font-semibold mb-2">Research Initiatives</h2>
               <p className="text-muted-foreground mb-4">

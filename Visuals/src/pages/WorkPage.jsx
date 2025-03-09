@@ -12,6 +12,7 @@ export default function WorkPage() {
               <CardContent className="p-6">
                 <h2 className="text-2xl font-semibold mb-4">Wildlife Detection</h2>
                 <img
+                  rel="preload"
                   src="/images/work1.jpeg"
                   alt="Wildlife detection"
                   className="w-full h-64 object-cover rounded-lg mb-4"
@@ -28,6 +29,7 @@ export default function WorkPage() {
               <CardContent className="p-6">
                 <h2 className="text-2xl font-semibold mb-4">Threat Prevention</h2>
                 <img
+                  rel="preload"
                   src="/images/work2.jpeg"
                   alt="Conservation"
                   className="w-full h-64 object-cover rounded-lg mb-4"
@@ -44,6 +46,7 @@ export default function WorkPage() {
               <CardContent className="p-6">
                 <h2 className="text-2xl font-semibold mb-4">Data Collection</h2>
                 <img
+                  rel="preload"
                   src="/images/work3.jpeg"
                   alt="Data collection"
                   className="w-full h-64 object-cover rounded-lg mb-4"

@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 export function AnimalProfile({ name, species, status, description, imageUrl }) {
   return (
     <Card className="overflow-hidden">
-      <img src={imageUrl} alt={name} className="w-full h-48 object-cover" />
+      <img src={imageUrl} alt={name} className="w-full h-48 object-cover" loading="lazy"/>
       <CardContent className="p-4">
         <h3 className="text-xl font-semibold mb-1">{name}</h3>
         <p className="text-sm text-muted-foreground mb-2">

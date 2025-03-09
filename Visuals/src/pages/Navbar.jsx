@@ -27,9 +27,14 @@ export default function Navbar() {
           </Link>
 
           <ThemeToggle />
-          <Button variant="ghost" className="flex items-center gap-2">
-            <LogOut className="h-4 w-4" /> Logout
+          <Link to="/">
+          <Button 
+            variant="ghost" 
+            className="flex items-center gap-2" >
+            <LogOut className="h-4 w-4" /> 
+            Logout
           </Button>
+          </Link>
         </div>
       </div>
     </nav>
