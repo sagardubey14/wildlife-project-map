@@ -1,16 +1,35 @@
-import { useState, useEffect } from 'react'
-import './App.css'
-import GunshotTrends from './Components/gunshotTrends/GunshotTrends'
-import Gunshot from './Components/gunshotTrends/Gunshot'
-import { transformCSVData, filterDataByTime } from "./Components/dataTransform";
-import MovingAnimalChart from './Components/MovingAnimalChart';
-import Auth from './pages/Auth';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation  } from "react-router-dom";
 import { ThemeProvider } from "@/context/ThemeContext";
+import Auth from './pages/Auth';
 import Navbar from './pages/Navbar';
 import HomePage from './pages/HomePage';
+import AboutPage from './pages/AboutPage';
+import WorkPage from './pages/WorkPage';
+import MapPage from './pages/MapPage';
+import DashboardPage from './pages/Dashboard';
 
-function App() {
-  // const [chartData, setChartData] = useState(null);
+export default function App() {
+  const location = useLocation();
+  const showNavbar = location.pathname !== "/auth";
+
+  return (
+    <ThemeProvider>
+    {showNavbar && <Navbar />}
+    <Routes>
+      <Route path="/" element={<Navigate to="/auth" />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/map" element={<MapPage />} />
+      <Route path="/work" element={<WorkPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/home" element={<HomePage />} />
+    </Routes>
+    </ThemeProvider>
+  );
+}
+
+
+// const [chartData, setChartData] = useState(null);
   // const [timeFilter, setTimeFilter] = useState("daily"); // Default: Daily
 
   // useEffect(() => {
@@ -23,35 +42,3 @@ function App() {
   //       console.log(chartData);
   //     });
   // }, [timeFilter]); // Refetch when filter changes
-
-  return (
-    <ThemeProvider>
-      {/* <Navbar /> */}
-      {/* <Auth /> */}
-      <HomePage />
-    </ThemeProvider>
-  )
-}
-
-export default App
-
-
-// <p className="text-3xl font-bold underline">
-//         Click on the Vite and React logos to learn more
-//       </p>
-//       <h1>Wildlife Analytics</h1>
-
-//       <label>View Data:</label>
-//       <select onChange={(e) => setTimeFilter(e.target.value)} value={timeFilter}>
-//         <option value="daily">Daily</option>
-//         <option value="weekly">Weekly</option>
-//         <option value="monthly">Monthly</option>
-//       </select>
-//       {chartData?
-//       <>
-//       <Gunshot data={chartData.gunshotsOverTime}/>
-//       <GunshotTrends />
-//       <MovingAnimalChart />
-//       </>:
-//       <p>Loading data...</p>
-//       }
