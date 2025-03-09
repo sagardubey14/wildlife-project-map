@@ -27,18 +27,3 @@ export default function App() {
     </ThemeProvider>
   );
 }
-
-
-// const [chartData, setChartData] = useState(null);
-  // const [timeFilter, setTimeFilter] = useState("daily"); // Default: Daily
-
-  // useEffect(() => {
-  //   fetch("/animal_data.csv")
-  //     .then((response) => response.text())
-  //     .then((csvData) => {
-  //       // console.log(csvData);
-  //       const transformedData = transformCSVData(csvData);
-  //       setChartData(filterDataByTime(transformedData, timeFilter));
-  //       console.log(chartData);
-  //     });
-  // }, [timeFilter]); // Refetch when filter changes

@@ -11,7 +11,7 @@ const animalProfiles = [
     status: "Vulnerable",
     description:
       "The largest living land animal, known for their intelligence and complex social structures.",
-    imageUrl: "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46",
+    imageUrl: "/images/home1.jpeg",
   },
   {
     name: "Bengal Tiger",
@@ -19,7 +19,7 @@ const animalProfiles = [
     status: "Endangered",
     description:
       "One of the largest wild cats native to the Indian subcontinent.",
-    imageUrl: "https://images.unsplash.com/photo-1561731216-c3a4d99437d5",
+    imageUrl: "/images/home2.jpeg",
   },
   {
     name: "Mountain Gorilla",
@@ -27,7 +27,7 @@ const animalProfiles = [
     status: "Endangered",
     description:
       "These gentle giants share 98% of their DNA with humans and live in mountainous forests.",
-    imageUrl: "https://images.unsplash.com/photo-1564760055775-d63b17a55c44",
+    imageUrl: "/images/home3.jpeg",
   },
 ];
 
@@ -48,7 +48,7 @@ export default function HomePage() {
           <Card>
             <CardContent className="p-6">
               <img
-                src="https://images.unsplash.com/photo-1669589486635-19d86f6ea708"
+                src="/images/home4.jpeg"
                 alt="Wildlife monitoring"
                 className="w-full h-48 object-cover rounded-lg mb-4"
               />
@@ -65,7 +65,7 @@ export default function HomePage() {
           <Card>
             <CardContent className="p-6">
               <img
-                src="https://images.unsplash.com/photo-1541544526507-e6bdeef40417"
+                src="/images/home5.jpeg"
                 alt="Conservation efforts"
                 className="w-full h-48 object-cover rounded-lg mb-4"
               />
@@ -82,7 +82,7 @@ export default function HomePage() {
           <Card>
             <CardContent className="p-6">
               <img
-                src="https://images.unsplash.com/photo-1518493914204-ecef7091fa67"
+                src="/images/home6.jpeg"
                 alt="Research initiatives"
                 className="w-full h-48 object-cover rounded-lg mb-4"
               />

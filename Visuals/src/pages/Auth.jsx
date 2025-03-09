@@ -122,12 +122,8 @@ export default function Auth() {
       </div>
 
       {/* Right Column (Image Full Screen) */}
-      <div className="w-1/2 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1448375240586-882707db888b')" }}>
-        {/* <div className="absolute top-4 right-4">
-          <Button onClick={toggleTheme} className="bg-gray-800 text-white hover:bg-gray-700">
-            {theme === "dark" ? "Light Mode" : "Dark Mode"}
-          </Button>
-        </div> */}
+      <div className="w-1/2 bg-cover bg-center" style={{ backgroundImage: "url('/images/auth.jpeg')" }}>
+        
       </div>
     </div>
   );

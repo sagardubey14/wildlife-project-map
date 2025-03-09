@@ -1,24 +1,106 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Loader2, Activity, AlertTriangle, Eye } from "lucide-react";
-
-// import { AlertTestPanel } from "@/components/alert-test-panel";
+import * as d3 from 'd3';
+import Visuals from "./Visuals";
+import { dataSourceCount, generateAnimalDatasourceSummary } from "../Components/dataTransform";
 
 export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
+  const [csvData, setCsvData] = useState();
   const [selectedDataset, setSelectedDataset] = useState("ALL");
-  
+  const [chartData, setChartData] = useState([]);
+  const [selectedTimeframe, setSelectedTimeframe] = useState("daily");
+  const [dataCount, setDataCount] = useState();
+  const [animalRadar, setAnimalRadar] = useState();
+
+  const [summary, setSummary] = useState({
+    totalDetections:0,
+    threatCount:0,
+    animalCount:0
+  })
+
+  const reducer = (acc, current)=>{
+    if (current.gunshot === "Yes") {
+      acc.threatCount += 1;
+    }
+    if (current.animal !== "No") {
+      acc.animalCount += 1;
+    }
+    return acc;
+  }
+
+  function chartAndSummary(data){
+
+    setChartData(data);
+    
+    const totalDetections = data.length;
+    const initialValue = {
+      threatCount: 0,
+      animalCount: 0
+    };
+    const result = data.reduce(reducer, initialValue);
+    // console.log(result);
+    
+    setSummary({totalDetections, ...result})
+  }
+
+  function logMemoryUsage() {
+    if (performance.memory) {
+      console.log("Memory Used: " + performance.memory.usedJSHeapSize / (1024 * 1024) + " MB");
+      console.log("Total Memory: " + performance.memory.totalJSHeapSize / (1024 * 1024) + " MB");
+      console.log("Memory Limit: " + performance.memory.jsHeapSizeLimit / (1024 * 1024) + " MB");
+    } else {
+      console.log("Memory API not supported in this browser.");
+    }
+  }
   useEffect(() => {
-    setTimeout(() => setIsLoading(false), 5000);
+    const cachedData = localStorage.getItem('animalData');
+    if (cachedData) {
+      const parsedData = JSON.parse(cachedData);
+      setCsvData(parsedData);
+      chartAndSummary(parsedData);
+      setDataCount(dataSourceCount(parsedData));
+      setAnimalRadar(generateAnimalDatasourceSummary(parsedData));
+    } else {
+      d3.csv("/animal_data.csv")
+        .then((data) => {
+          localStorage.setItem('animalData', JSON.stringify(data)); // Cache data
+          console.log(data[0]);
+          setCsvData(data);
+          chartAndSummary(data);
+          setDataCount(dataSourceCount(data));
+          setAnimalRadar(generateAnimalDatasourceSummary(data));
+        })
+        .catch((error) => console.error("Error fetching CSV:", error));
+    }
+    logMemoryUsage();
+    return () => {
+      localStorage.removeItem('animalData');
+    };
+  }, []);
+  
+  useEffect(()=>{
+    if(!csvData) return;
+    if(selectedDataset === "ALL")
+      chartAndSummary(csvData)
+    else{
+      chartAndSummary(csvData.filter(data=> data.datasource === `datasource${selectedDataset.charAt(2)}`));
+    }
+  },[selectedDataset])
+
+  useEffect(() => {
+    setTimeout(() => setIsLoading(false), 1000);
   }, []);
 
-  const detections = [
-    { id: 1, type: "threat", description: "Poacher detected", timestamp: Date.now() - 1000000 },
-    { id: 2, type: "animal", description: "Elephant spotted", timestamp: Date.now() - 500000 },
-    { id: 3, type: "threat", description: "Fire detected", timestamp: Date.now() - 200000 },
-    { id: 4, type: "animal", description: "Tiger spotted", timestamp: Date.now() - 300000 },
-    { id: 5, type: "animal", description: "Deer spotted", timestamp: Date.now() - 700000 },
-  ];
 
   if (isLoading) {
     return (
@@ -27,10 +109,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-
-  const totalDetections = detections.length;
-  const threatCount = detections.filter(d => d.type === 'threat').length;
-  const animalCount = detections.filter(d => d.type === 'animal').length;
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -57,7 +135,7 @@ export default function DashboardPage() {
               <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalDetections}</div>
+              <div className="text-2xl font-bold">{summary.totalDetections}</div>
             </CardContent>
           </Card>
 
@@ -67,7 +145,7 @@ export default function DashboardPage() {
               <AlertTriangle className="h-4 w-4 text-destructive" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{threatCount}</div>
+              <div className="text-2xl font-bold">{summary.threatCount}</div>
             </CardContent>
           </Card>
 
@@ -77,11 +155,29 @@ export default function DashboardPage() {
               <Eye className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{animalCount}</div>
+              <div className="text-2xl font-bold">{summary.animalCount}</div>
             </CardContent>
           </Card>
         </div>
+
+        <div className="mb-6">
+        <label htmlFor="timeframe" className="text-lg font-medium text-gray-700">Select Timeframe:</label>
+        <DropdownMenu>
+        <DropdownMenuTrigger className="p-2 mx-2 bg-gray-200 text-gray-800 rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        Open
+        </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Time Filter</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={()=>setSelectedTimeframe('daily')}>Daily</DropdownMenuItem>
+            <DropdownMenuItem onClick={()=>setSelectedTimeframe('weekly')}>Weekly</DropdownMenuItem>
+            <DropdownMenuItem onClick={()=>setSelectedTimeframe('monthly')}>Monthly</DropdownMenuItem>
+            <DropdownMenuItem onClick={()=>alert("The data is not sufficient")}>Yearly</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        </div> 
       </div>
+      <Visuals data={chartData} filter={selectedTimeframe} dataSources={dataCount} animalRadar={animalRadar}/>
     </div>
   );
 }
