@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Info, Briefcase, LogOut, BarChart, MapPin } from "lucide-react";
-import { ThemeToggle } from "../context/ThemeToggle";
+import { ThemeToggle } from "./ThemeToggle";
+
 
 export default function Navbar() {
+  
   return (
     <nav className="border-b bg-card">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">

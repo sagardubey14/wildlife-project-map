@@ -10,6 +10,7 @@ import DashboardPage from './pages/Dashboard';
 import 'leaflet/dist/leaflet.css';
 import Map from "./pages/Map/Map";
 import FileUploadComponent from "./pages/Map/FileUploadComponent";
+import { UserProvider } from "./context/userContext";
 
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
   const showNavbar = location.pathname !== "/auth";
 
   return (
+    <UserProvider>
     <ThemeProvider>
     {showNavbar && <Navbar />}
     <Routes>
@@ -29,5 +31,6 @@ export default function App() {
       <Route path="/home" element={<HomePage />} />
     </Routes>
     </ThemeProvider>
+    </UserProvider>
   );
 }

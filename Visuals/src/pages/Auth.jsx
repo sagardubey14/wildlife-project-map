@@ -28,6 +28,7 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { useTheme } from "@/context/ThemeContext";
+import { useUser } from "../context/userContext";
 
 const mockAuth = (data) => {
   return new Promise((resolve, reject) => {
@@ -43,11 +44,12 @@ const mockAuth = (data) => {
 
 export default function Auth() {
   const { theme, toggleTheme } = useTheme();
-  const [user, setUser] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [error, setError] = useState(null);
   const [isPending, setIsPending] = useState(false);
   const [otpTime, setOtpTime] = useState(false);
   const navigate = useNavigate();
+  const {apiUrl, setApiUrl, user, setUser} = useUser();
 
   const loginForm = useForm({ defaultValues: { username: "", password: "" } });
   const registerForm = useForm({
@@ -72,7 +74,11 @@ export default function Auth() {
     setIsPending(true);
     setError(null);
     console.log(data);
-    if (!isRegistering) navigate("/home");
+    if (!isRegistering){
+      if(data.username === "dev" && data.password === "sagar")
+        setDialogOpen(true);
+      navigate("/home");
+    } 
     setOtpTime(true);
   };
 
@@ -86,6 +92,46 @@ export default function Auth() {
         theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
       }`}
     >
+      {dialogOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-0">
+          <div className="w-full sm:w-[400px] bg-white rounded-lg shadow-lg">
+            <Card>
+              <CardHeader>
+                <CardTitle>Enter API URL</CardTitle>
+                <CardDescription>
+                  Please provide the API URL that you want to use.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <input
+                  type="text"
+                  value={apiUrl}
+                  onChange={(e)=>setApiUrl(e.target.value)}
+                  placeholder="Enter API URL"
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                />
+              </CardContent>
+              <div className="p-4 flex justify-end">
+                <button
+                  onClick={()=>{
+                    setApiUrl(apiUrl);
+                    setDialogOpen(false);
+                  }}
+                  className="bg-green-500 text-white p-2 rounded mr-2"
+                >
+                  Submit
+                </button>
+                <button
+                  onClick={()=>setDialogOpen(false)}
+                  className="bg-red-500 text-white p-2 rounded"
+                >
+                  Cancel
+                </button>
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
       <div className="w-1/2 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
