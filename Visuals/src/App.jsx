@@ -22,7 +22,7 @@ export default function App() {
     <ThemeProvider>
     {showNavbar && <Navbar />}
     <Routes>
-      <Route path="/" element={<Navigate to="/auth" />} />
+      <Route path="/" element={<Navigate to="/home" />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/map" element={<MapPage />} />

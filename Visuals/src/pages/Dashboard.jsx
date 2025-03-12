@@ -12,6 +12,8 @@ import { Loader2, Activity, AlertTriangle, Eye } from "lucide-react";
 import * as d3 from 'd3';
 import Visuals from "./Visuals";
 import { dataSourceCount, generateAnimalDatasourceSummary } from "../Components/dataTransform";
+import { useUser } from "../context/userContext";
+import { Navigate } from "react-router-dom";
 
 export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -21,6 +23,11 @@ export default function DashboardPage() {
   const [selectedTimeframe, setSelectedTimeframe] = useState("daily");
   const [dataCount, setDataCount] = useState();
   const [animalRadar, setAnimalRadar] = useState();
+  const {user} = useUser();
+
+  // if(!user){
+  //   return <Navigate to="/" />;
+  // }
 
   const [summary, setSummary] = useState({
     totalDetections:0,

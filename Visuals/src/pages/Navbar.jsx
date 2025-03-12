@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Info, Briefcase, LogOut, BarChart, MapPin } from "lucide-react";
+import { Info, Briefcase, LogOut, BarChart, MapPin, LogIn } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { useUser } from "../context/userContext";
 
 
 export default function Navbar() {
+
+  const {user, setUser} = useUser();
   
   return (
     <nav className="border-b bg-card">
@@ -20,23 +23,33 @@ export default function Navbar() {
             <Briefcase className="h-4 w-4" /> Our Work
           </Link>
 
-          <Link to="/dashboard" className="flex items-center gap-2 hover:text-primary">
+          {user && <Link to="/dashboard" className="flex items-center gap-2 hover:text-primary">
             <BarChart className="h-4 w-4" /> Dashboard
-          </Link>
+          </Link>}
 
           <Link to="/map" className="flex items-center gap-2 hover:text-primary">
             <MapPin className="h-4 w-4" /> Maps
           </Link>
 
           <ThemeToggle />
-          <Link to="/">
+          {!user?
+          <Link to="/auth">
           <Button 
+            variant="ghost" 
+            className="flex items-center gap-2" >
+            <LogIn className="h-4 w-4" /> 
+            LogIn
+          </Button>
+          </Link>:
+          <Link to="/auth">
+          <Button 
+            onClick = {()=>setUser("")}
             variant="ghost" 
             className="flex items-center gap-2" >
             <LogOut className="h-4 w-4" /> 
             Logout
           </Button>
-          </Link>
+          </Link>}
         </div>
       </div>
     </nav>

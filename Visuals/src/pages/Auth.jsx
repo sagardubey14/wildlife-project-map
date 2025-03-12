@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger  } from "@/components/ui/tabs";
 import {
   InputOTP,
   InputOTPGroup,
@@ -50,7 +50,7 @@ export default function Auth() {
   const [otpTime, setOtpTime] = useState(false);
   const navigate = useNavigate();
   const {apiUrl, setApiUrl, user, setUser} = useUser();
-
+  console.log(user)
   const loginForm = useForm({ defaultValues: { username: "", password: "" } });
   const registerForm = useForm({
     defaultValues: {
@@ -68,7 +68,13 @@ export default function Auth() {
       pin2: "",
     },
   });
-  
+
+  const handleOTP = async(data)=>{
+    console.log(data)
+    setTimeout(() => {
+      setUser('admin')
+    }, 1000);
+  }
 
   const handleSubmit = async (data, isRegistering) => {
     setIsPending(true);
@@ -77,9 +83,18 @@ export default function Auth() {
     if (!isRegistering){
       if(data.username === "dev" && data.password === "sagar")
         setDialogOpen(true);
-      navigate("/home");
-    } 
-    setOtpTime(true);
+      else{
+        setTimeout(()=>{
+          setUser('admin')
+          loginForm.reset();
+          setIsPending(false);
+        },1000)
+      }
+    }else{
+      setTimeout(()=>{
+        setOtpTime(true);
+      },1000)
+    }
   };
 
   if (user) {
@@ -144,8 +159,7 @@ export default function Auth() {
             <CardContent>
             <Form {...otpForm}>
               <form
-                onSubmit={otpForm.handleSubmit(data=>console.log(data))
-                }
+                onSubmit={otpForm.handleSubmit((data)=>handleOTP(data))}
                 className="w-2/3 space-y-6"
               >
                 <FormField
@@ -201,6 +215,7 @@ export default function Auth() {
               </form>
             </Form>
           </CardContent>
+
           )}
           {!otpTime && (
             <CardContent>

@@ -1,5 +1,5 @@
 import { TrendingUp } from "lucide-react";
-import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
 import {
   Card,
   CardContent,
@@ -8,6 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 const dataSourceData = [
   { source: "Camera Traps", value: 45 },
@@ -26,26 +32,30 @@ export default function DataSourcePieChart({ data }) {
         <CardDescription>Which sources provide more data?</CardDescription>
       </CardHeader>
       <CardContent>
-        <PieChart width={600} height={350}>
-          <Pie
-            data={data}
-            dataKey="value"
-            nameKey="source"
-            cx="50%"
-            cy="50%"
-            outerRadius={100}
-            label
-          >
-            {data.map((entry, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={COLORS[index % COLORS.length]}
-              />
-            ))}
-          </Pie>
-          <Tooltip />
-          <Legend />
-        </PieChart>
+        <ChartContainer config={{}}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="source"
+                cx="50%"
+                cy="50%"
+                outerRadius="40%"
+                label
+              >
+                {data.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">

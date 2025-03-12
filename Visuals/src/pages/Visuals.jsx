@@ -19,26 +19,24 @@ function Visuals({data, filter, dataSources, animalRadar}) {
     // console.log(countAnimal(data));
     
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 p-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <Card>
         <Gunshot data={gunshot(data,filter)} />
       </Card>
       <Card>
-        <GunshotsPerAnimalChart data={animalPerGunshot(data)}/>
-      </Card>
-
-      <Card>
-        <MovingAnimalChart data={animalCount(data, filter)}/>
+        <GunshotsPerAnimalChart data={animalPerGunshot(data)} />
       </Card>
       <Card>
-        <AnimalSightingsChart data={countAnimal(data)}/>
+        <MovingAnimalChart data={animalCount(data, filter)} />
       </Card>
-
+      <Card>
+        <AnimalSightingsChart data={countAnimal(data)} />
+      </Card>
       <Card>
         <DataSourcePieChart data={dataSources} />
       </Card>
       <Card>
-        <AnimalRadarChart data ={animalRadar}/>
+        <AnimalRadarChart data={animalRadar} />
       </Card>
     </div>
   )

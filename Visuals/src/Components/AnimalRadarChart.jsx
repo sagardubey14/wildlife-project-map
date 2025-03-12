@@ -52,12 +52,13 @@ export default function AnimalRadarChart({ data }) {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <ResponsiveContainer width="100%" height={400}>
-            <RadarChart outerRadius={150} data={data}>
+          <ResponsiveContainer width="100%" height="100%">
+            <RadarChart outerRadius="80%" data={data}> {/* Adjust outerRadius based on container size */}
               <PolarGrid />
               <PolarAngleAxis dataKey="animal" />
               <PolarRadiusAxis angle={90} />
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />              <Radar name="Datasource 1" dataKey="datasource1" stroke={chartConfig.datasource1.color} fill={chartConfig.datasource1.color} fillOpacity={0.6} />
+              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              <Radar name="Datasource 1" dataKey="datasource1" stroke={chartConfig.datasource1.color} fill={chartConfig.datasource1.color} fillOpacity={0.6} />
               <Radar name="Datasource 2" dataKey="datasource2" stroke={chartConfig.datasource2.color} fill={chartConfig.datasource2.color} fillOpacity={0.6} />
               <Radar name="Datasource 3" dataKey="datasource3" stroke={chartConfig.datasource3.color} fill={chartConfig.datasource3.color} fillOpacity={0.6} />
               <Radar name="Datasource 4" dataKey="datasource4" stroke={chartConfig.datasource4.color} fill={chartConfig.datasource4.color} fillOpacity={0.6} />
@@ -73,6 +74,7 @@ export default function AnimalRadarChart({ data }) {
           Visualizing the frequency data across various animal species.
         </div>
       </CardFooter>
+
     </>
   );
 }

@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 const Map = ({position, locations}) => {
   const handleMapClick = (e) => {
     const { lat, lng } = e.latlng;
-    alert(`Clicked at: ${lat}, ${lng}`);
+    // alert(`Clicked at: ${lat}, ${lng}`);
   };
 
   return (
