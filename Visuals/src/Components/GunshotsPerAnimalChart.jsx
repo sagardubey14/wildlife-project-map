@@ -29,10 +29,6 @@ export default function GunshotsPerAnimalChart({data}) {
 
   return (
     <>
-      <CardHeader>
-        <CardTitle>🔫 Gunshots Per Animal</CardTitle>
-        <CardDescription>Risk levels per species</CardDescription>
-      </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <BarChart width={500} height={300} data={data}>
@@ -56,14 +52,6 @@ export default function GunshotsPerAnimalChart({data}) {
           </BarChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Gunshot activity trend <TrendingUp className="h-4 w-4 text-red-500" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-        Tracking the frequency of gunshots heard versus silent zones across species.
-        </div>
-      </CardFooter>
     </>
   );
 }

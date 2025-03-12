@@ -44,7 +44,7 @@ const colorPalette = [
 
 export default function MovingAnimalChart({data}) {
 
-  const animalKeys = Object.keys(data[0]).filter(key => key !== 'date' && key !== 'No');
+  const animalKeys = Object.keys(data[0]).filter(key => key !== 'date' && key !== 'No' && key !== 'x_axis');
 
   const transformedData = data.map((entry) =>{
       const {x_axis, ...rest} = entry
@@ -58,10 +58,6 @@ export default function MovingAnimalChart({data}) {
   
   return (
     <>
-      <CardHeader>
-        <CardTitle>🐾 Moving Animal Trends</CardTitle>
-        <CardDescription>Tracking migration patterns</CardDescription>
-      </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <LineChart width={600} height={300} data={transformedData}>
@@ -88,14 +84,6 @@ export default function MovingAnimalChart({data}) {
           </LineChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Animal movement trend <TrendingUp className="h-4 w-4 text-green-500" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Tracking migration patterns for different species.
-        </div>
-      </CardFooter>
     </>
   );
 }

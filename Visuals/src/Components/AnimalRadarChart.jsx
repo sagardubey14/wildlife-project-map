@@ -1,5 +1,5 @@
 import { TrendingUp } from "lucide-react";
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import {
   Card,
   CardContent,
@@ -46,10 +46,6 @@ export default function AnimalRadarChart({ data }) {
 
   return (
     <>
-      <CardHeader>
-        <CardTitle>🐾 Animal Frequency Radar Chart</CardTitle>
-        <CardDescription>Comparing animal data across multiple sources</CardDescription>
-      </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <ResponsiveContainer width="100%" height="100%">
@@ -57,6 +53,7 @@ export default function AnimalRadarChart({ data }) {
               <PolarGrid />
               <PolarAngleAxis dataKey="animal" />
               <PolarRadiusAxis angle={90} />
+              <Legend />
               <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
               <Radar name="Datasource 1" dataKey="datasource1" stroke={chartConfig.datasource1.color} fill={chartConfig.datasource1.color} fillOpacity={0.6} />
               <Radar name="Datasource 2" dataKey="datasource2" stroke={chartConfig.datasource2.color} fill={chartConfig.datasource2.color} fillOpacity={0.6} />
@@ -66,15 +63,6 @@ export default function AnimalRadarChart({ data }) {
           </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Animal data comparison <TrendingUp className="h-4 w-4 text-orange-500" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Visualizing the frequency data across various animal species.
-        </div>
-      </CardFooter>
-
     </>
   );
 }

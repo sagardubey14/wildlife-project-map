@@ -25,9 +25,9 @@ export default function DashboardPage() {
   const [animalRadar, setAnimalRadar] = useState();
   const {user} = useUser();
 
-  // if(!user){
-  //   return <Navigate to="/" />;
-  // }
+  if(!user){
+    return <Navigate to="/" />;
+  }
 
   const [summary, setSummary] = useState({
     totalDetections:0,
@@ -118,60 +118,25 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-background px-4">
       <div className="container mx-auto">
-        <h1 className="text-4xl font-bold mb-4">Wildlife Analytics Dashboard</h1>
+        {/* <h1 className="text-4xl font-bold mb-4">Wildlife Analytics Dashboard</h1> */}
         
         {/* Navbar */}
-        <div className="mb-6 flex space-x-4 border-b pb-2 text-lg font-medium">
+        <div className="mb-2 flex space-x-4 border-b py-2 text-lg font-medium">
           {["ALL", "DS1", "DS2", "DS3", "DS4"].map((dataset) => (
             <button
               key={dataset}
-              className={`px-4 py-2 ${selectedDataset === dataset ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`}
+              className={`px-4 ${selectedDataset === dataset ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`}
               onClick={() => setSelectedDataset(dataset)}
             >
               {dataset}
             </button>
           ))}
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-3 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Detections</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.totalDetections}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Threats Detected</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-destructive" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.threatCount}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Wildlife Sightings</CardTitle>
-              <Eye className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.animalCount}</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="mb-6">
-        <label htmlFor="timeframe" className="text-lg font-medium text-gray-700">Select Timeframe:</label>
+        <div className="px-4">
         <DropdownMenu>
-        <DropdownMenuTrigger className="p-2 mx-2 bg-gray-200 text-gray-800 rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        Open
+        <DropdownMenuTrigger className="px-2 text-lg">
+        Timeframe
         </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuLabel>Time Filter</DropdownMenuLabel>
@@ -182,7 +147,31 @@ export default function DashboardPage() {
             <DropdownMenuItem onClick={()=>alert("The data is not sufficient")}>Yearly</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3 mb-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 ">
+              <CardTitle className="text-sm font-medium flex">Total Detections <Activity className="ml-2 mt-1 h-4 w-4 text-muted-foreground" /></CardTitle>
+              <div className="text-2xl font-bold">{summary.totalDetections}</div>
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 ">
+              <CardTitle className="text-sm font-medium flex">Threats Detected <AlertTriangle className="ml-2 mt-0.5 h-4 w-4 text-destructive" /></CardTitle>
+              <div className="text-2xl font-bold">{summary.threatCount}</div>
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-sm font-medium flex">Wildlife Sightings <Eye className="ml-2 mt-1 h-4 w-4 text-primary" /></CardTitle>
+              <div className="text-2xl font-bold">{summary.animalCount}</div>
+            </CardHeader>
+          </Card>
         </div> 
+        
       </div>
       <Visuals data={chartData} filter={selectedTimeframe} dataSources={dataCount} animalRadar={animalRadar}/>
     </div>

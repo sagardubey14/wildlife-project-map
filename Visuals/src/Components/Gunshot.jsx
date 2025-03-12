@@ -29,10 +29,6 @@ export default function Gunshot({ data }) {
   }));
   return (
     <>
-      <CardHeader>
-        <CardTitle>📊 Gunshot Trends Over Time</CardTitle>
-        <CardDescription>Detecting poaching patterns</CardDescription>
-      </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <LineChart
@@ -61,14 +57,6 @@ export default function Gunshot({ data }) {
           </LineChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Gunshot activity trend <TrendingUp className="h-4 w-4 text-red-500" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Tracking recorded gunshots over time.
-        </div>
-      </CardFooter>
     </>
   );
 }

@@ -27,10 +27,6 @@ const COLORS = ["#4f46e5", "#f59e0b", "#10b981", "#ef4444"];
 export default function DataSourcePieChart({ data }) {
   return (
     <>
-      <CardHeader>
-        <CardTitle>📊 Data Source Contribution</CardTitle>
-        <CardDescription>Which sources provide more data?</CardDescription>
-      </CardHeader>
       <CardContent>
         <ChartContainer config={{}}>
           <ResponsiveContainer width="100%" height="100%">
@@ -41,7 +37,7 @@ export default function DataSourcePieChart({ data }) {
                 nameKey="source"
                 cx="50%"
                 cy="50%"
-                outerRadius="40%"
+                outerRadius="80%"
                 label
               >
                 {data.map((entry, index) => (
@@ -57,16 +53,6 @@ export default function DataSourcePieChart({ data }) {
           </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Data source contribution{" "}
-          <TrendingUp className="h-4 w-4 text-blue-500" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Analyzing the contribution of different data sources in the overall
-          dataset.
-        </div>
-      </CardFooter>
     </>
   );
 }

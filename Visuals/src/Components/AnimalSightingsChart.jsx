@@ -31,10 +31,6 @@ export default function AnimalSightingsChart({data}) {
   
   return (
     <>
-      <CardHeader>
-        <CardTitle>📊 Animal Sightings Count</CardTitle>
-        <CardDescription>Most detected animals</CardDescription>
-      </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <BarChart width={500} height={300} data={data}>
@@ -46,15 +42,6 @@ export default function AnimalSightingsChart({data}) {
           </BarChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-  <div className="flex gap-2 font-medium leading-none">
-    Animal sightings count <TrendingUp className="h-4 w-4 text-green-500" />
-  </div>
-  <div className="leading-none text-muted-foreground">
-    Displaying the most detected animals across different sources.
-  </div>
-</CardFooter>
-
     </>
   );
 }

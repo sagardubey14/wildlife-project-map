@@ -88,73 +88,73 @@ export function animalPerGunshot(data){
     return Object.values(result);
 }
 
-export function animalCount(data, filter) {
-    let result = [];
+// export function animalCount(data, filter) {
+//     let result = [];
 
-    if (filter === 'daily') {
-        data.forEach(element => {
-            // Find if animal is already in the result
-            let existingEntry = result.find(item => item.x_axis === element.date);
+//     if (filter === 'daily') {
+//         data.forEach(element => {
+//             // Find if animal is already in the result
+//             let existingEntry = result.find(item => item.x_axis === element.date);
             
-            if (existingEntry) {
-                // If the animal is already in the entry, increment its count
-                if (existingEntry[element.animal]) {
-                    existingEntry[element.animal] += 1;
-                } else {
-                    existingEntry[element.animal] = 1; // Initialize if the animal is new
-                }
-            } else {
-                // If no entry exists for the date, create one
-                let newEntry = { x_axis: element.date };
-                newEntry[element.animal] = 1; // Initialize the animal count
-                result.push(newEntry);
-            }
-        });
-    }
+//             if (existingEntry) {
+//                 // If the animal is already in the entry, increment its count
+//                 if (existingEntry[element.animal]) {
+//                     existingEntry[element.animal] += 1;
+//                 } else {
+//                     existingEntry[element.animal] = 1; // Initialize if the animal is new
+//                 }
+//             } else {
+//                 // If no entry exists for the date, create one
+//                 let newEntry = { x_axis: element.date };
+//                 newEntry[element.animal] = 1; // Initialize the animal count
+//                 result.push(newEntry);
+//             }
+//         });
+//     }
 
-    if (filter === 'weekly') {
-        data.forEach(element => {
-            const week = `Week-${Number(element.week) + 1}`;
-            let existingEntry = result.find(item => item.x_axis === week);
+//     if (filter === 'weekly') {
+//         data.forEach(element => {
+//             const week = `Week-${Number(element.week) + 1}`;
+//             let existingEntry = result.find(item => item.x_axis === week);
 
-            if (existingEntry) {
-                if (existingEntry[element.animal]) {
-                    existingEntry[element.animal] += 1;
-                } else {
-                    existingEntry[element.animal] = 1;
-                }
-            } else {
-                let newEntry = { x_axis: week };
-                newEntry[element.animal] = 1;
-                result.push(newEntry);
-            }
-        });
-    }
+//             if (existingEntry) {
+//                 if (existingEntry[element.animal]) {
+//                     existingEntry[element.animal] += 1;
+//                 } else {
+//                     existingEntry[element.animal] = 1;
+//                 }
+//             } else {
+//                 let newEntry = { x_axis: week };
+//                 newEntry[element.animal] = 1;
+//                 result.push(newEntry);
+//             }
+//         });
+//     }
 
-    if (filter === 'monthly') {
-        data.forEach(element => {
-            const date = new Date(element.date);
-            const month = date.getMonth();
-            const monthName = monthNames[month];
+//     if (filter === 'monthly') {
+//         data.forEach(element => {
+//             const date = new Date(element.date);
+//             const month = date.getMonth();
+//             const monthName = monthNames[month];
 
-            let existingEntry = result.find(item => item.x_axis === monthName);
+//             let existingEntry = result.find(item => item.x_axis === monthName);
 
-            if (existingEntry) {
-                if (existingEntry[element.animal]) {
-                    existingEntry[element.animal] += 1;
-                } else {
-                    existingEntry[element.animal] = 1;
-                }
-            } else {
-                let newEntry = { x_axis: monthName };
-                newEntry[element.animal] = 1;
-                result.push(newEntry);
-            }
-        });
-    }
+//             if (existingEntry) {
+//                 if (existingEntry[element.animal]) {
+//                     existingEntry[element.animal] += 1;
+//                 } else {
+//                     existingEntry[element.animal] = 1;
+//                 }
+//             } else {
+//                 let newEntry = { x_axis: monthName };
+//                 newEntry[element.animal] = 1;
+//                 result.push(newEntry);
+//             }
+//         });
+//     }
 
-    return result;
-}
+//     return result;
+// }
 
 export function countAnimal (data){
     let result={};
@@ -214,3 +214,87 @@ export function generateAnimalDatasourceSummary(data) {
     return result;
 }
   
+
+export function animalCount(data, filter) {
+    let result = [];
+    let allAnimals = new Set(); // A set to track all unique animals
+
+    // Collect all unique animals
+    data.forEach(element => {
+        allAnimals.add(element.animal);
+    });
+
+    if (filter === 'daily') {
+        data.forEach(element => {
+            let existingEntry = result.find(item => item.x_axis === element.date);
+
+            if (existingEntry) {
+                // If the animal is already in the entry, increment its count
+                if (existingEntry[element.animal]) {
+                    existingEntry[element.animal] += 1;
+                } else {
+                    existingEntry[element.animal] = 1; // Initialize if the animal is new
+                }
+            } else {
+                // If no entry exists for the date, create one
+                let newEntry = { x_axis: element.date };
+                allAnimals.forEach(animal => {
+                    newEntry[animal] = 0; // Initialize all animals with 0 count
+                });
+                newEntry[element.animal] = 1; // Set the count for the current animal
+                result.push(newEntry);
+            }
+        });
+    }
+
+    if (filter === 'weekly') {
+        data.forEach(element => {
+            const week = `Week-${Number(element.week) + 1}`;
+            let existingEntry = result.find(item => item.x_axis === week);
+
+            if (existingEntry) {
+                // Increment the animal count
+                if (existingEntry[element.animal]) {
+                    existingEntry[element.animal] += 1;
+                } else {
+                    existingEntry[element.animal] = 1;
+                }
+            } else {
+                let newEntry = { x_axis: week };
+                allAnimals.forEach(animal => {
+                    newEntry[animal] = 0; // Initialize all animals with 0 count
+                });
+                newEntry[element.animal] = 1; // Set the count for the current animal
+                result.push(newEntry);
+            }
+        });
+    }
+
+    if (filter === 'monthly') {
+        data.forEach(element => {
+            const date = new Date(element.date);
+            const month = date.getMonth();
+            const monthName = monthNames[month];
+
+            let existingEntry = result.find(item => item.x_axis === monthName);
+
+            if (existingEntry) {
+                // Increment the animal count
+                if (existingEntry[element.animal]) {
+                    existingEntry[element.animal] += 1;
+                } else {
+                    existingEntry[element.animal] = 1;
+                }
+            } else {
+                let newEntry = { x_axis: monthName };
+                allAnimals.forEach(animal => {
+                    newEntry[animal] = 0; // Initialize all animals with 0 count
+                });
+                newEntry[element.animal] = 1; // Set the count for the current animal
+                result.push(newEntry);
+            }
+        });
+    }
+
+    return result;
+}
