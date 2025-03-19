@@ -1,27 +1,96 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, useMapEvents, Marker, Popup } from 'react-leaflet';
 import "leaflet/dist/leaflet.css";
 import FileUploadComponent from './FileUploadComponent';
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
+import L from 'leaflet';
+
+const blueIcon = L.icon({
+  className: 'blue-icon',
+  iconUrl:'/Marker/blueicon.png',
+  iconSize: [25, 25],
+  iconAnchor: [12, 24],
+  popupAnchor: [0, -24],
+});
+
+const redIcon = L.icon({
+  className: 'red-icon',
+  iconUrl:'/Marker/redicon.png',
+  iconSize: [25, 25],
+  iconAnchor: [12, 24],
+  popupAnchor: [0, -24],
+});
+
+const greenIcon = L.icon({
+  className: 'green-icon',
+  iconUrl:'/Marker/greenicon.png',
+  iconSize: [25, 25],
+  iconAnchor: [12, 24],
+  popupAnchor: [0, -24],
+});
+
+const locations = [
+  { id: 1, lat: 19.1988, lng: 72.9207, name: "Data Source 1" },
+  { id: 2, lat: 19.2346, lng: 72.8747, name: "Data Source 2" },
+  { id: 3, lat: 19.1649, lng: 72.9054, name: "Data Source 3" },
+  { id: 4, lat: 19.2554, lng: 72.9149, name: "Data Source 4" },
+];
 
 
-const Map = ({position, locations}) => {
+const Map = ({position}) => {
+
+  const [status, setStatus ] = useState({
+    1:{
+      msg:"on stand by",
+      type: "red",
+      loading:false,
+    },
+    2:{
+      msg:"on stand by",
+      type: "blue",
+      loading:false,
+    },
+    3:{
+      msg:"on stand by",
+      type: "red",
+      loading:false,
+    },
+    4:{
+      msg:"on stand by",
+      type: "blue",
+      loading:false,
+    },
+  });
+
+  const [clickedMark, setClickedMark] = useState(null);
+
   const handleMapClick = (e) => {
     const { lat, lng } = e.latlng;
-    // alert(`Clicked at: ${lat}, ${lng}`);
   };
 
   return (
-    <MapContainer center={position} zoom={13} style={{ height: '100vh', width:'100vw' }}>
+    <MapContainer center={position} zoom={13} style={{ height: '95vh', width:'100vw' }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {locations.map((location)=>(
-        <Marker key={location.id} 
-        eventHandlers={{ click: (e) => console.log('marker clicked', e) }}
-        position={[location.lat, location.lng]}>
+        <Marker 
+          key={location.id} 
+          eventHandlers={{ click: (e) => {
+            setClickedMark(location.id)
+            console.log('marker clicked', e)
+          } }}
+          position={[location.lat, location.lng]}
+          icon={
+            status[location.id].type === 'blue' ? blueIcon : 
+            status[location.id].type === 'red' ? redIcon : 
+            greenIcon
+          }
+        >
         <Popup>
         <div>
-            <FileUploadComponent msg={"on stand by"}/>
+            <FileUploadComponent 
+              status={status} 
+              clickedMark={clickedMark}
+              setStatus={setStatus} 
+              locations={locations}/>
         </div>
         </Popup>
         </Marker>

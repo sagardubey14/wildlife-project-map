@@ -17,18 +17,8 @@ export default function MapPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  const locations = [
-    { id: 1, lat: 19.1988, lng: 72.9207, name: "Data Source 1" },
-    { id: 2, lat: 19.2346, lng: 72.8747, name: "Data Source 2" },
-    { id: 3, lat: 19.1649, lng: 72.9054, name: "Data Source 3" },
-    { id: 4, lat: 19.2554, lng: 72.9149, name: "Data Source 4" }
-  ];
+  
 
-  const handleMapClick = (e) => {
-    // Store clicked position
-    const { lat, lng } = e.latlng;
-    console.log(lat, lng);
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -47,7 +37,7 @@ export default function MapPage() {
               ) : (
                 <div className="space-y-4">
                   <div className="h-[600px] bg-muted rounded-lg flex items-center justify-center">
-                    <Map position={position} zoomLevel={zoomLevel} locations={locations} />
+                    <Map position={position} zoomLevel={zoomLevel} />
                   </div>
                 </div>
               )}

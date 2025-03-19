@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUser } from "../../context/userContext";
+import { Loader2 } from "lucide-react";
 
-export default function FileUploadComponent({msg}) {
+export default function FileUploadComponent({status, clickedMark, locations, setStatus}) {
   const [selection, setSelection] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [audioFile, setAudioFile] = useState(null);
+  const [loading, setLoading] = useState(null)
   const {user} = useUser();
 
   const handleSelectionChange = (value) => {
@@ -18,7 +20,6 @@ export default function FileUploadComponent({msg}) {
     setAudioFile(null);
   };
 
-  // Handle file uploads
   const handleFileUpload = (e, type) => {
     const file = e.target.files[0];
     console.log(e.target);
@@ -46,9 +47,20 @@ export default function FileUploadComponent({msg}) {
     }
   
     try {
+      
+      const newStatus = {
+        ...status,
+        [clickedMark]:{
+          ...status[clickedMark],
+          loading:true,
+        }
+      }
+      // console.log(newStatus);
+      setStatus(newStatus);
+
       const response = await fetch("http://localhost:8000/upload", {
         method: "POST",
-        body: formData,
+        body: {formData, clickedMark},
       });
   
       const data = await response.json();
@@ -58,6 +70,7 @@ export default function FileUploadComponent({msg}) {
       } else {
         console.error("Error uploading file:", data);
       }
+
     } catch (error) {
       console.error("Error during file upload:", error);
     } finally{
@@ -69,8 +82,12 @@ export default function FileUploadComponent({msg}) {
 
   return (
     <Card className="w-full max-w-md bg-background text-foreground border border-border shadow-md">
-        <Label className="px-5">{msg}</Label>
-      {user &&
+      <Label className="px-5">{status[clickedMark].msg}</Label>
+      {status[clickedMark].loading?
+      <div className="flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin" />
+      </div> :
+      user &&
         <CardContent>
         <Label className="mb-2 block text-sm font-medium text-muted-foreground">Select an option:</Label>
         <RadioGroup onValueChange={handleSelectionChange} defaultValue="">
@@ -104,9 +121,9 @@ export default function FileUploadComponent({msg}) {
             </div>
           )}
         </div>
-
         <Button className="w-full mt-4" onClick={handleSubmit}>Submit</Button>
-      </CardContent>}
+      </CardContent>
+      }
     </Card>
   );
 }

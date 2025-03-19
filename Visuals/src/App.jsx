@@ -8,8 +8,6 @@ import WorkPage from './pages/WorkPage';
 import MapPage from './pages/MapPage';
 import DashboardPage from './pages/Dashboard';
 import 'leaflet/dist/leaflet.css';
-import Map from "./pages/Map/Map";
-import FileUploadComponent from "./pages/Map/FileUploadComponent";
 import { UserProvider } from "./context/userContext";
 
 
