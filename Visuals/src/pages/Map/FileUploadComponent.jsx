@@ -12,7 +12,6 @@ export default function FileUploadComponent({msg}) {
   const [audioFile, setAudioFile] = useState(null);
   const {user} = useUser();
 
-  // Handle selection change
   const handleSelectionChange = (value) => {
     setSelection(value);
     setImageFile(null);
@@ -34,39 +33,38 @@ export default function FileUploadComponent({msg}) {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    if (!file) {
-      alert("Please select a file first");
-      return;
-    }
-
+  
     const formData = new FormData();
-    formData.append("file", file);
-
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-
+  
+    if (selection === "animal") {
+      formData.append("image", imageFile);
+    } else if (selection === "gun" || selection === "both") {
+      formData.append("audio", audioFile);
+      formData.append("image", imageFile);
+    }
+  
     try {
-      const response = await fetch("api", {
+      const response = await fetch("http://localhost:8000/upload", {
         method: "POST",
         body: formData,
       });
-
+  
+      const data = await response.json();
+  
       if (response.ok) {
-        setSuccess("File uploaded successfully!");
+        console.log("File uploaded successfully", data);
       } else {
-        setError("Error uploading file.");
+        console.error("Error uploading file:", data);
       }
     } catch (error) {
-      setError("An error occurred while uploading.");
-    } finally {
-      setLoading(false);
+      console.error("Error during file upload:", error);
+    } finally{
+      setAudioFile(null);
+      setImageFile(null);
     }
-  };
+  };  
 
 
   return (
@@ -107,7 +105,7 @@ export default function FileUploadComponent({msg}) {
           )}
         </div>
 
-        <Button className="w-full mt-4">Submit</Button>
+        <Button className="w-full mt-4" onClick={handleSubmit}>Submit</Button>
       </CardContent>}
     </Card>
   );
