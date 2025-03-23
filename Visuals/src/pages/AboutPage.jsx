@@ -16,7 +16,7 @@ export default function AboutPage() {
                 monitoring to create a comprehensive wildlife protection system.
               </p>
               <img
-                src="/images/about1.jpeg"
+                src="/images/about1.webp"
                 alt="Wildlife"
                 className="w-full h-64 object-cover rounded-lg mb-4"
               />
@@ -46,7 +46,7 @@ export default function AboutPage() {
                 a more effective system for protecting wildlife and their habitats.
               </p>
               <img
-                src="/images/about2.jpeg"
+                src="/images/about2.webp"
                 alt="Conservation"
                 className="w-full h-64 object-cover rounded-lg"
               />

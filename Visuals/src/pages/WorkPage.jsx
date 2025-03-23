@@ -13,7 +13,7 @@ export default function WorkPage() {
                 <h2 className="text-2xl font-semibold mb-4">Wildlife Detection</h2>
                 <img
                   rel="preload"
-                  src="/images/work1.jpeg"
+                  src="/images/work1.webp"
                   alt="Wildlife detection"
                   className="w-full h-64 object-cover rounded-lg mb-4"
                 />
@@ -30,7 +30,7 @@ export default function WorkPage() {
                 <h2 className="text-2xl font-semibold mb-4">Threat Prevention</h2>
                 <img
                   rel="preload"
-                  src="/images/work2.jpeg"
+                  src="/images/work2.webp"
                   alt="Conservation"
                   className="w-full h-64 object-cover rounded-lg mb-4"
                 />
@@ -47,7 +47,7 @@ export default function WorkPage() {
                 <h2 className="text-2xl font-semibold mb-4">Data Collection</h2>
                 <img
                   rel="preload"
-                  src="/images/work3.jpeg"
+                  src="/images/work3.webp"
                   alt="Data collection"
                   className="w-full h-64 object-cover rounded-lg mb-4"
                 />

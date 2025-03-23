@@ -11,7 +11,7 @@ const animalProfiles = [
     status: "Vulnerable",
     description:
       "The largest living land animal, known for their intelligence and complex social structures.",
-    imageUrl: "/images/home1.jpeg",
+    imageUrl: "/images/home1.webp",
   },
   {
     name: "Bengal Tiger",
@@ -19,7 +19,7 @@ const animalProfiles = [
     status: "Endangered",
     description:
       "One of the largest wild cats native to the Indian subcontinent.",
-    imageUrl: "/images/home2.jpeg",
+    imageUrl: "/images/home2.webp",
   },
   {
     name: "Mountain Gorilla",
@@ -27,7 +27,7 @@ const animalProfiles = [
     status: "Endangered",
     description:
       "These gentle giants share 98% of their DNA with humans and live in mountainous forests.",
-    imageUrl: "/images/home3.jpeg",
+    imageUrl: "/images/home3.webp",
   },
 ];
 
@@ -48,7 +48,7 @@ export default function HomePage() {
           <Card>
             <CardContent className="p-6">
               <img
-                src="/images/home4.jpeg"
+                src="/images/home4.webp"
                 alt="Wildlife monitoring"
                 className="w-full h-48 object-cover rounded-lg mb-4"
                loading="lazy"
@@ -66,7 +66,7 @@ export default function HomePage() {
           <Card>
             <CardContent className="p-6">
               <img
-                src="/images/home5.jpeg"
+                src="/images/home5.webp"
                 alt="Conservation efforts"
                 className="w-full h-48 object-cover rounded-lg mb-4"
                 loading="lazy"
@@ -84,7 +84,7 @@ export default function HomePage() {
           <Card>
             <CardContent className="p-6">
               <img
-                src="/images/home6.jpeg"
+                src="/images/home6.webp"
                 alt="Research initiatives"
                 className="w-full h-48 object-cover rounded-lg mb-4"
                 loading="lazy"

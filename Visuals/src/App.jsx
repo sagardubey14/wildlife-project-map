@@ -9,11 +9,12 @@ import MapPage from './pages/MapPage';
 import DashboardPage from './pages/Dashboard';
 import 'leaflet/dist/leaflet.css';
 import { UserProvider } from "./context/userContext";
+import ForReview from "./pages/ForReview";
 
 
 export default function App() {
   const location = useLocation();
-  const showNavbar = location.pathname !== "/auth";
+  const showNavbar = location.pathname !== "/auth" && location.pathname !== "/review" ;
 
   return (
     <UserProvider>
@@ -27,6 +28,7 @@ export default function App() {
       <Route path="/work" element={<WorkPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/home" element={<HomePage />} />
+      <Route path="/review" element={<ForReview />} />
     </Routes>
     </ThemeProvider>
     </UserProvider>

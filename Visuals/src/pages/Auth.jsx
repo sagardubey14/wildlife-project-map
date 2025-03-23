@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,38 +8,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger  } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { data, Navigate, useNavigate } from "react-router-dom";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "../context/userContext";
-
-const mockAuth = (data) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (data.username === "admin" && data.password === "admin") {
-        resolve({ user: { username: "admin" } });
-      } else {
-        reject(new Error("Invalid username or password"));
-      }
-    }, 1000);
-  });
-};
+import io from "socket.io-client";
 
 export default function Auth() {
   const { theme, toggleTheme } = useTheme();
@@ -48,57 +29,148 @@ export default function Auth() {
   const [error, setError] = useState(null);
   const [isPending, setIsPending] = useState(false);
   const [otpTime, setOtpTime] = useState(false);
-  const navigate = useNavigate();
-  const {apiUrl, setApiUrl, user, setUser} = useUser();
-  console.log(user)
-  const loginForm = useForm({ defaultValues: { username: "", password: "" } });
-  const registerForm = useForm({
-    defaultValues: {
-      username: "",
-      email: "",
-      phone: "",
-      deptId: "",
-      password: "",
-      confirmPassword: "",
-    },
-  });
-  const otpForm = useForm({
-    defaultValues: {
-      pin1: "",
-      pin2: "",
-    },
-  });
+  const { apiUrl, setApiUrl, user, setUser, review, setReview } = useUser();
+  const [emailOtp, setEmailOtp] = useState(null);
+  const [phoneOtp, setPhoneOtp] = useState(null);
 
-  const handleOTP = async(data)=>{
-    console.log(data)
-    setTimeout(() => {
-      setUser('admin')
-    }, 1000);
-  }
+  const [loginData, setLoginData] = useState({ username: "", password: "" });
+  const [registerData, setRegisterData] = useState({
+    username: "",
+    email: "",
+    phone: "",
+    deptId: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [otpData, setOtpData] = useState({ pin1: "", pin2: "" });
+  const [socketInstance, setSocketInstance] = useState();
+
+  const handleLoginChange = (e) => {
+    const { name, value } = e.target;
+    setLoginData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleRegisterChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "phone" && socketInstance) {
+      socketInstance.emit("message", { type: "phone", value });
+    }
+    setRegisterData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleOtpChange = (name, value) => {
+    if (name === "pin2" && socketInstance) {
+      socketInstance.emit("message", { type: "otp", value });
+    }
+    setOtpData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  useEffect(() => {
+    if (!review) return;
+    const socket = io("http://localhost:3000", {
+      query: {
+        user: "auth",
+      },
+    });
+    socket.on("verify-to-auth", (msg) => {
+      setPhoneOtp(msg);
+      if (msg === "no") setError("Invalid OTP");
+      else setError(null);
+      setIsPending(false)
+    });
+    setSocketInstance(socket);
+    return () => {
+      socket.disconnect();
+    };
+  }, [review]);
+
+  const handleOTP = async (data) => {
+    setIsPending(true);
+    setError(null);
+    if (socketInstance) {
+      socketInstance.emit("message", { type: "otpsubmit", value: "done" });
+    }
+    if (emailOtp != data.pin1) {
+      setError("Invalid OTP");
+      setIsPending(false);
+    }
+  };
+
+  const login = async (username, password) => {
+    try {
+      const response = await fetch('http://localhost:8000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+      const result = await response.json();
+      setUser(result.username);
+
+    } catch (error) {
+      console.error(error);
+      setError(error.msg);
+    } finally{
+      setIsPending(false)
+    }
+  };
+  
+  const register = async (userData) => {
+    try {
+      const response = await fetch('http://localhost:8000/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+      const result = await response.json();
+      setEmailOtp(result.otp);
+      setOtpTime(true);
+
+    } catch (error) {
+      console.error(error);
+      setError(error.msg);
+    } finally{
+      setIsPending(false);
+    }
+  };
+  
 
   const handleSubmit = async (data, isRegistering) => {
     setIsPending(true);
     setError(null);
-    console.log(data);
-    if (!isRegistering){
-      if(data.username === "dev" && data.password === "sagar")
+    if (!isRegistering) {
+      if (data.username === "dev" && data.password === "sagar") {
         setDialogOpen(true);
-      else{
-        setTimeout(()=>{
-          setUser('admin')
-          loginForm.reset();
-          setIsPending(false);
-        },1000)
+        setIsPending(false);
+      } else {
+        login(data.username, data.password)
       }
-    }else{
-      setTimeout(()=>{
-        setOtpTime(true);
-      },1000)
+    } else {
+      if (socketInstance) {
+        socketInstance.emit("message", { type: "registered", value: "done" });
+      }
+      register(data)
     }
   };
 
   if (user) {
     return <Navigate to="/" />;
+  }
+
+  if (emailOtp == otpData.pin1 && (review ?phoneOtp === "yes": true)) {
+    setUser(registerData.username);
   }
 
   return (
@@ -108,8 +180,8 @@ export default function Auth() {
       }`}
     >
       {dialogOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-0">
-          <div className="w-full sm:w-[400px] bg-white rounded-lg shadow-lg">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-0">
+          <div className="w-full sm:w-[400px] bg-white rounded-lg shadow-lg p-6">
             <Card>
               <CardHeader>
                 <CardTitle>Enter API URL</CardTitle>
@@ -118,27 +190,58 @@ export default function Auth() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <input
-                  type="text"
-                  value={apiUrl}
-                  onChange={(e)=>setApiUrl(e.target.value)}
-                  placeholder="Enter API URL"
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                />
+                <div className="mb-4">
+                  <label
+                    htmlFor="apiUrl"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    API URL
+                  </label>
+                  <input
+                    type="text"
+                    id="apiUrl"
+                    value={apiUrl}
+                    onChange={(e) => setApiUrl(e.target.value)}
+                    placeholder="Enter API URL"
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Review:
+                  </label>
+                  <RadioGroup onValueChange={setReview} value={review}>
+                    <div className="flex gap-4">
+                      <Label className="flex items-center gap-2 text-foreground">
+                        <RadioGroupItem value="ON" checked={review === "ON"} />{" "}
+                        ON
+                      </Label>
+                      <Label className="flex items-center gap-2 text-foreground">
+                        <RadioGroupItem
+                          value="OFF"
+                          checked={review === "OFF"}
+                        />{" "}
+                        OFF
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
               </CardContent>
-              <div className="p-4 flex justify-end">
+
+              <div className="flex justify-end space-x-4">
                 <button
-                  onClick={()=>{
+                  onClick={() => {
                     setApiUrl(apiUrl);
                     setDialogOpen(false);
                   }}
-                  className="bg-green-500 text-white p-2 rounded mr-2"
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
                 >
                   Submit
                 </button>
                 <button
-                  onClick={()=>setDialogOpen(false)}
-                  className="bg-red-500 text-white p-2 rounded"
+                  onClick={() => setDialogOpen(false)}
+                  className="bg-red-500 text-white px-4 py-2 mr-5 rounded-md hover:bg-red-600 transition-colors"
                 >
                   Cancel
                 </button>
@@ -157,66 +260,62 @@ export default function Auth() {
           </CardHeader>
           {otpTime && (
             <CardContent>
-            <Form {...otpForm}>
-              <form
-                onSubmit={otpForm.handleSubmit((data)=>handleOTP(data))}
-                className="w-2/3 space-y-6"
-              >
-                <FormField
+              <div>
+                <CardTitle>Email OTP</CardTitle>
+                <CardDescription>
+                  Enter the OTP sent to your email
+                </CardDescription>
+                <InputOTP
+                  maxLength={6}
                   name="pin1"
-                  control={otpForm.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>One-Time Password</FormLabel>
-                      <FormControl>
-                        <InputOTP maxLength={6} {...field}>
-                          <InputOTPGroup>
-                            <InputOTPSlot index={0} />
-                            <InputOTPSlot index={1} />
-                            <InputOTPSlot index={2} />
-                            <InputOTPSlot index={3} />
-                            <InputOTPSlot index={4} />
-                            <InputOTPSlot index={5} />
-                          </InputOTPGroup>
-                        </InputOTP>
-                      </FormControl>
-                      <FormDescription>
-                        Please enter the one-time password sent to your phone.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  name="pin2"
-                  control={otpForm.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <InputOTP maxLength={6} {...field}>
-                          <InputOTPGroup>
-                            <InputOTPSlot index={0} />
-                            <InputOTPSlot index={1} />
-                            <InputOTPSlot index={2} />
-                            <InputOTPSlot index={3} />
-                            <InputOTPSlot index={4} />
-                            <InputOTPSlot index={5} />
-                          </InputOTPGroup>
-                        </InputOTP>
-                      </FormControl>
-                      <FormDescription>
-                        Please enter the one-time password sent to your Gmail.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit">Submit</Button>
-              </form>
-            </Form>
-          </CardContent>
+                  value={otpData.pin1}
+                  onChange={(e) => handleOtpChange("pin1", e)}
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                  </InputOTPGroup>
+                  <InputOTPSeparator />
+                  <InputOTPGroup>
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
 
+              {review &&<div>
+                <CardTitle>Phone Number OTP</CardTitle>
+                <CardDescription>
+                  Enter the OTP sent to your phone
+                </CardDescription>
+                <InputOTP
+                  maxLength={6}
+                  name="pin2"
+                  value={otpData.pin2}
+                  onChange={(e) => handleOtpChange("pin2", e)}
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                  </InputOTPGroup>
+                  <InputOTPSeparator />
+                  <InputOTPGroup>
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>}
+              {error && <p className="text-red-500">{error}</p>}
+              <Button className="mt-5" disabled={isPending} onClick={() => handleOTP(otpData)}>
+                Submit
+              </Button>
+            </CardContent>
           )}
+
           {!otpTime && (
             <CardContent>
               <Tabs defaultValue="login">
@@ -226,161 +325,117 @@ export default function Auth() {
                 </TabsList>
 
                 <TabsContent value="login">
-                  <Form {...loginForm}>
-                    <form
-                      onSubmit={loginForm.handleSubmit((data) =>
-                        handleSubmit(data, false)
-                      )}
-                      className="space-y-4"
-                    >
-                      <FormField
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleSubmit(loginData, false);
+                    }}
+                    className="space-y-4"
+                  >
+                    <div>
+                      <label>Username</label>
+                      <Input
                         name="username"
-                        control={loginForm.control}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Username</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        value={loginData.username}
+                        onChange={(e) => handleLoginChange(e)}
                       />
-
-                      <FormField
+                    </div>
+                    <div>
+                      <label>Password</label>
+                      <Input
+                        type="password"
                         name="password"
-                        control={loginForm.control}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                              <Input type="password" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        value={loginData.password}
+                        onChange={(e) => handleLoginChange(e)}
                       />
+                    </div>
 
-                      {error && <p className="text-red-500">{error}</p>}
-                      <Button
-                        type="submit"
-                        className="w-full bg-green-600 hover:bg-green-700"
-                        disabled={isPending}
-                      >
-                        Login
-                      </Button>
-                    </form>
-                  </Form>
+                    {error && <p className="text-red-500">{error}</p>}
+                    <Button
+                      type="submit"
+                      className="w-full bg-green-600 hover:bg-green-700"
+                      disabled={isPending}
+                    >
+                      Login
+                    </Button>
+                  </form>
                 </TabsContent>
 
                 <TabsContent value="register">
-                  <Form {...registerForm}>
-                    <form
-                      onSubmit={registerForm.handleSubmit((data) =>
-                        handleSubmit(data, true)
-                      )}
-                      className="space-y-4"
-                    >
-                      {/* Username */}
-                      <FormField
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleSubmit(registerData, true);
+                    }}
+                    className="space-y-4"
+                  >
+                    <div>
+                      <label>Username</label>
+                      <Input
                         name="username"
-                        control={registerForm.control}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Username</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        value={registerData.username}
+                        onChange={(e) => handleRegisterChange(e)}
                       />
+                    </div>
 
-                      {/* Email */}
-                      <FormField
+                    <div>
+                      <label>Email</label>
+                      <Input
+                        type="email"
                         name="email"
-                        control={registerForm.control}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input type="email" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        value={registerData.email}
+                        onChange={(e) => handleRegisterChange(e)}
                       />
+                    </div>
 
-                      {/* Phone Number */}
-                      <FormField
+                    <div>
+                      <label>Phone Number</label>
+                      <Input
+                        type="tel"
                         name="phone"
-                        control={registerForm.control}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phone Number</FormLabel>
-                            <FormControl>
-                              <Input type="tel" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        value={registerData.phone}
+                        onChange={(e) => handleRegisterChange(e)}
                       />
+                    </div>
 
-                      {/* Dept ID */}
-                      <FormField
+                    <div>
+                      <label>Dept ID</label>
+                      <Input
                         name="deptId"
-                        control={registerForm.control}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Dept ID</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        value={registerData.deptId}
+                        onChange={(e) => handleRegisterChange(e)}
                       />
+                    </div>
 
-                      {/* Password */}
-                      <FormField
+                    <div>
+                      <label>Password</label>
+                      <Input
+                        type="password"
                         name="password"
-                        control={registerForm.control}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                              <Input type="password" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        value={registerData.password}
+                        onChange={(e) => handleRegisterChange(e)}
                       />
+                    </div>
 
-                      {/* Confirm Password */}
-                      <FormField
+                    <div>
+                      <label>Confirm Password</label>
+                      <Input
+                        type="password"
                         name="confirmPassword"
-                        control={registerForm.control}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Confirm Password</FormLabel>
-                            <FormControl>
-                              <Input type="password" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        value={registerData.confirmPassword}
+                        onChange={(e) => handleRegisterChange(e)}
                       />
+                    </div>
 
-                      {error && <p className="text-red-500">{error}</p>}
-                      <Button
-                        type="submit"
-                        className="w-full bg-green-600 hover:bg-green-700"
-                        disabled={isPending}
-                      >
-                        Register
-                      </Button>
-                    </form>
-                  </Form>
+                    {error && <p className="text-red-500">{error}</p>}
+                    <Button
+                      type="submit"
+                      className="w-full bg-green-600 hover:bg-green-700"
+                      disabled={isPending}
+                    >
+                      Register
+                    </Button>
+                  </form>
                 </TabsContent>
               </Tabs>
             </CardContent>
@@ -391,7 +446,7 @@ export default function Auth() {
       {/* Right Column (Image Full Screen) */}
       <div
         className="w-1/2 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/auth.jpeg')" }}
+        style={{ backgroundImage: "url('/images/auth.webp')" }}
       ></div>
     </div>
   );
