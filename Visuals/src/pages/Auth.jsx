@@ -33,7 +33,7 @@ export default function Auth() {
   const [emailOtp, setEmailOtp] = useState(null);
   const [phoneOtp, setPhoneOtp] = useState(null);
 
-  const [loginData, setLoginData] = useState({ username: "", password: "" });
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [registerData, setRegisterData] = useState({
     username: "",
     email: "",
@@ -98,6 +98,21 @@ export default function Auth() {
     setError(null);
     if (socketInstance) {
       socketInstance.emit("message", { type: "otpsubmit", value: "done" });
+    }else{
+      try {
+        const response = await fetch('http://localhost:8000/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({...registerData, otp:data.pin1}),
+        });
+        const result = await response.json();
+        console.log(result.message);  
+      } catch (error) {
+        console.error('Registration Error:', error);
+        setError("An unexpected error occurred. Please try again.");
+      }
     }
     if (emailOtp != data.pin1) {
       setError("Invalid OTP");
@@ -105,23 +120,30 @@ export default function Auth() {
     }
   };
 
-  const login = async (username, password) => {
+  const login = async (email, password) => {
+    setIsPending(true);
     try {
       const response = await fetch('http://localhost:8000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       });
+  
+      if (!response.ok) {
+        const result = await response.json();
+        setError(result.error || "An error occurred. Please try again.");
+        return;
+      }
       const result = await response.json();
       setUser(result.username);
-
+      return <Navigate to="/" />;
     } catch (error) {
       console.error(error);
-      setError(error.msg);
-    } finally{
-      setIsPending(false)
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsPending(false);
     }
   };
   
@@ -134,13 +156,21 @@ export default function Auth() {
         },
         body: JSON.stringify(userData),
       });
+
+      if (!response.ok) {
+        const result = await response.json();
+        setError(result.error);
+        return;
+      }
       const result = await response.json();
+      console.log(result);
+      
       setEmailOtp(result.otp);
       setOtpTime(true);
 
     } catch (error) {
-      console.error(error);
-      setError(error.msg);
+      console.error('Registration Error:', error);
+      setError("An unexpected error occurred. Please try again.");
     } finally{
       setIsPending(false);
     }
@@ -151,11 +181,11 @@ export default function Auth() {
     setIsPending(true);
     setError(null);
     if (!isRegistering) {
-      if (data.username === "dev" && data.password === "sagar") {
+      if (data.email === "dev" && data.password === "sagar") {
         setDialogOpen(true);
         setIsPending(false);
       } else {
-        login(data.username, data.password)
+        login(data.email, data.password)
       }
     } else {
       if (socketInstance) {
@@ -165,13 +195,35 @@ export default function Auth() {
     }
   };
 
-  if (user) {
-    return <Navigate to="/" />;
+  function forgotPassword(){
+    const email = loginData.email
+    const regex = /^[\w\.-]+@[\w\.-]+\.\w+$/;
+    if(!regex.test(loginData.email)){
+      alert("Please Enter valid Email");
+      return;
+    }
+    fetch("http://localhost:8000/forgot-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: email }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        setError(data.error);
+      } else {
+        alert(data.message);
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      setError("An error occurred. Please try again.");
+    });
   }
 
-  if (emailOtp == otpData.pin1 && (review ?phoneOtp === "yes": true)) {
-    setUser(registerData.username);
-  }
+  
 
   return (
     <div
@@ -333,10 +385,10 @@ export default function Auth() {
                     className="space-y-4"
                   >
                     <div>
-                      <label>Username</label>
+                      <label>Email</label>
                       <Input
-                        name="username"
-                        value={loginData.username}
+                        name="email"
+                        value={loginData.email}
                         onChange={(e) => handleLoginChange(e)}
                       />
                     </div>
@@ -358,6 +410,9 @@ export default function Auth() {
                     >
                       Login
                     </Button>
+                    <p
+                     onClick={forgotPassword}
+                     className="text-blue-500 font-semibold hover:underline cursor-pointer">Forgot Password?</p>
                   </form>
                 </TabsContent>
 
