@@ -3,6 +3,8 @@ import { MapContainer, TileLayer, useMapEvents, Marker, Popup } from 'react-leaf
 import "leaflet/dist/leaflet.css";
 import FileUploadComponent from './FileUploadComponent';
 import L from 'leaflet';
+import io from 'socket.io-client';
+
 
 const blueIcon = L.icon({
   className: 'blue-icon',
@@ -41,7 +43,7 @@ const Map = ({position}) => {
   const [status, setStatus ] = useState({
     1:{
       msg:"on stand by",
-      type: "red",
+      type: "blue",
       loading:false,
     },
     2:{
@@ -51,7 +53,7 @@ const Map = ({position}) => {
     },
     3:{
       msg:"on stand by",
-      type: "red",
+      type: "blue",
       loading:false,
     },
     4:{
@@ -60,8 +62,48 @@ const Map = ({position}) => {
       loading:false,
     },
   });
-
+  
   const [clickedMark, setClickedMark] = useState(null);
+  const [socketInstance, setSocketInstance] = useState(null)
+
+  const updateStatus = (dataArray) => {
+    setStatus((prevStatus) => {
+      
+      const updatedStatus = { ...prevStatus };
+  
+      dataArray.forEach((entry) => {
+        const { datasource, animal, time } = entry;
+        updatedStatus[datasource] = {
+          ...updatedStatus[datasource],
+          msg: `Last seen ${animal} at ${time}`,
+          type: "green",
+        };
+      });
+  
+      return updatedStatus;
+    });
+  };
+
+  useEffect(()=>{
+    const socket = io('http://localhost:3000',{
+      query: {
+        user:'map',
+      }
+    });
+    setSocketInstance(socket)
+    return(()=>{
+      socket.disconnect();
+    })
+  },[])
+
+  useEffect(()=>{
+    if(!socketInstance) return;
+    socketInstance.emit('start_interval');
+    socketInstance.on('random_data',data=>{
+      console.log(data);
+      updateStatus(data)
+    })
+  },[socketInstance]);
 
   const handleMapClick = (e) => {
     const { lat, lng } = e.latlng;
@@ -89,8 +131,10 @@ const Map = ({position}) => {
             <FileUploadComponent 
               status={status} 
               clickedMark={clickedMark}
-              setStatus={setStatus} 
+              setStatus={setStatus}
+              socketInstance={socketInstance} 
               locations={locations}/>
+              
         </div>
         </Popup>
         </Marker>

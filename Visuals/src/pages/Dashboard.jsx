@@ -14,10 +14,11 @@ import Visuals from "./Visuals";
 import { dataSourceCount, generateAnimalDatasourceSummary } from "../Components/dataTransform";
 import { useUser } from "../context/userContext";
 import { Navigate } from "react-router-dom";
+import { useDash } from "../context/dashContext";
 
 export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
-  const [csvData, setCsvData] = useState();
+  const {animalData, setAnimalData} = useDash();
   const [selectedDataset, setSelectedDataset] = useState("ALL");
   const [chartData, setChartData] = useState([]);
   const [selectedTimeframe, setSelectedTimeframe] = useState("daily");
@@ -55,8 +56,7 @@ export default function DashboardPage() {
       animalCount: 0
     };
     const result = data.reduce(reducer, initialValue);
-    // console.log(result);
-    
+
     setSummary({totalDetections, ...result})
   }
 
@@ -70,22 +70,17 @@ export default function DashboardPage() {
     }
   }
   useEffect(() => {
+    if(animalData) return;
     const cachedData = localStorage.getItem('animalData');
     if (cachedData) {
       const parsedData = JSON.parse(cachedData);
-      setCsvData(parsedData);
-      chartAndSummary(parsedData);
-      setDataCount(dataSourceCount(parsedData));
-      setAnimalRadar(generateAnimalDatasourceSummary(parsedData));
+      setAnimalData(parsedData)
     } else {
       d3.csv("/animal_data.csv")
         .then((data) => {
-          localStorage.setItem('animalData', JSON.stringify(data)); // Cache data
+          localStorage.setItem('animalData', JSON.stringify(data));
           console.log(data[0]);
-          setCsvData(data);
-          chartAndSummary(data);
-          setDataCount(dataSourceCount(data));
-          setAnimalRadar(generateAnimalDatasourceSummary(data));
+          setAnimalData(data)
         })
         .catch((error) => console.error("Error fetching CSV:", error));
     }
@@ -96,13 +91,17 @@ export default function DashboardPage() {
   }, []);
   
   useEffect(()=>{
-    if(!csvData) return;
+    if(!animalData) return;
+    chartAndSummary(animalData);
+    setDataCount(dataSourceCount(animalData));
+    setAnimalRadar(generateAnimalDatasourceSummary(animalData));
+    console.log(animalData.length);
     if(selectedDataset === "ALL")
-      chartAndSummary(csvData)
+      chartAndSummary(animalData)
     else{
-      chartAndSummary(csvData.filter(data=> data.datasource === `datasource${selectedDataset.charAt(2)}`));
+      chartAndSummary(animalData.filter(data=> data.datasource === `datasource${selectedDataset.charAt(2)}`));
     }
-  },[selectedDataset])
+  },[selectedDataset, animalData])
 
   useEffect(() => {
     setTimeout(() => setIsLoading(false), 1000);

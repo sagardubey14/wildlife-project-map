@@ -10,6 +10,7 @@ import DashboardPage from './pages/Dashboard';
 import 'leaflet/dist/leaflet.css';
 import { UserProvider } from "./context/userContext";
 import ForReview from "./pages/ForReview";
+import { DashProvider } from "./context/dashContext";
 
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
   return (
     <UserProvider>
     <ThemeProvider>
+    <DashProvider>
     {showNavbar && <Navbar />}
     <Routes>
       <Route path="/" element={<Navigate to="/home" />} />
@@ -30,6 +32,7 @@ export default function App() {
       <Route path="/home" element={<HomePage />} />
       <Route path="/review" element={<ForReview />} />
     </Routes>
+    </DashProvider>
     </ThemeProvider>
     </UserProvider>
   );

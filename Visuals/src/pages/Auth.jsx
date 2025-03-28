@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/input-otp";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "../context/userContext";
 import io from "socket.io-client";
@@ -32,7 +32,7 @@ export default function Auth() {
   const { apiUrl, setApiUrl, user, setUser, review, setReview } = useUser();
   const [emailOtp, setEmailOtp] = useState(null);
   const [phoneOtp, setPhoneOtp] = useState(null);
-
+  const navigate = useNavigate();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [registerData, setRegisterData] = useState({
     username: "",
@@ -74,6 +74,13 @@ export default function Auth() {
     }));
   };
 
+  useEffect(()=>{
+    if(!otpTime) return;
+    if (emailOtp == "Done" && (review ?phoneOtp === "yes": true)) {
+      setUser(registerData.username);
+    }
+  },[emailOtp, phoneOtp, otpData, registerData])
+
   useEffect(() => {
     if (!review) return;
     const socket = io("http://localhost:3000", {
@@ -84,8 +91,10 @@ export default function Auth() {
     socket.on("verify-to-auth", (msg) => {
       setPhoneOtp(msg);
       if (msg === "no") setError("Invalid OTP");
-      else setError(null);
-      setIsPending(false)
+      else {
+        setError(null);
+      }
+      setIsPending(false);
     });
     setSocketInstance(socket);
     return () => {
@@ -94,29 +103,35 @@ export default function Auth() {
   }, [review]);
 
   const handleOTP = async (data) => {
+    if(data.pin1.lenght < 6) return;
     setIsPending(true);
     setError(null);
+    console.log(emailOtp, emailOtp !== "Done");
     if (socketInstance) {
       socketInstance.emit("message", { type: "otpsubmit", value: "done" });
-    }else{
-      try {
-        const response = await fetch('http://localhost:8000/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({...registerData, otp:data.pin1}),
-        });
-        const result = await response.json();
-        console.log(result.message);  
-      } catch (error) {
-        console.error('Registration Error:', error);
-        setError("An unexpected error occurred. Please try again.");
-      }
     }
-    if (emailOtp != data.pin1) {
-      setError("Invalid OTP");
-      setIsPending(false);
+    if(emailOtp === "Done") return;
+    try {
+      const response = await fetch('http://localhost:8000/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({...registerData, otp:data.pin1}),
+      });
+      const result = await response.json();
+      console.log(result);
+    } catch (error) {
+      console.error('Registration Error:', error);
+      setError("An unexpected error occurred. Please try again.");
+    }
+    if(emailOtp !== "Done"){
+      if(emailOtp != data.pin1) {
+        setError("Invalid OTP");
+        setIsPending(false);
+      }else{
+        setEmailOtp("Done")
+      }
     }
   };
 
@@ -137,8 +152,8 @@ export default function Auth() {
         return;
       }
       const result = await response.json();
+      console.log(result);
       setUser(result.username);
-      return <Navigate to="/" />;
     } catch (error) {
       console.error(error);
       setError("An unexpected error occurred. Please try again.");
@@ -163,8 +178,7 @@ export default function Auth() {
         return;
       }
       const result = await response.json();
-      console.log(result);
-      
+      // console.log(result);
       setEmailOtp(result.otp);
       setOtpTime(true);
 
@@ -176,6 +190,15 @@ export default function Auth() {
     }
   };
   
+  function isValidPassword(password) {
+    if (password.length < 8) {
+      return false;
+    }
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    return hasUpperCase && hasNumber && hasSpecialChar;
+  }
 
   const handleSubmit = async (data, isRegistering) => {
     setIsPending(true);
@@ -188,6 +211,16 @@ export default function Auth() {
         login(data.email, data.password)
       }
     } else {
+      if(!isValidPassword(data.password)){
+        setIsPending(false);
+        setError("Password must be at least 8 characters long, contain at least one uppercase letter, one number, and one special character.")
+        return;
+      }
+      if(data.password !== data.confirmPassword){
+        setIsPending(false);
+        setError("Password and confirmation password do not match.")
+        return;
+      }
       if (socketInstance) {
         socketInstance.emit("message", { type: "registered", value: "done" });
       }
@@ -223,7 +256,12 @@ export default function Auth() {
     });
   }
 
-  
+  useEffect(() => {
+    if (user) {
+      console.log(user);
+      navigate('/home');
+    }
+  }, [user, navigate]);
 
   return (
     <div

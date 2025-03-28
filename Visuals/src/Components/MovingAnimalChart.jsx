@@ -54,7 +54,7 @@ export default function MovingAnimalChart({data}) {
       }
   });
 
-  console.log(transformedData);
+  // console.log(transformedData);
   
   return (
     <>
