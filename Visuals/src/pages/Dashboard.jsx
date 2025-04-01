@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Loader2, Activity, AlertTriangle, Eye } from "lucide-react";
-import * as d3 from 'd3';
 import Visuals from "./Visuals";
 import { dataSourceCount, generateAnimalDatasourceSummary } from "../Components/dataTransform";
 import { useUser } from "../context/userContext";
@@ -59,36 +58,6 @@ export default function DashboardPage() {
 
     setSummary({totalDetections, ...result})
   }
-
-  function logMemoryUsage() {
-    if (performance.memory) {
-      console.log("Memory Used: " + performance.memory.usedJSHeapSize / (1024 * 1024) + " MB");
-      console.log("Total Memory: " + performance.memory.totalJSHeapSize / (1024 * 1024) + " MB");
-      console.log("Memory Limit: " + performance.memory.jsHeapSizeLimit / (1024 * 1024) + " MB");
-    } else {
-      console.log("Memory API not supported in this browser.");
-    }
-  }
-  useEffect(() => {
-    if(animalData) return;
-    const cachedData = localStorage.getItem('animalData');
-    if (cachedData) {
-      const parsedData = JSON.parse(cachedData);
-      setAnimalData(parsedData)
-    } else {
-      d3.csv("/animal_data.csv")
-        .then((data) => {
-          localStorage.setItem('animalData', JSON.stringify(data));
-          console.log(data[0]);
-          setAnimalData(data)
-        })
-        .catch((error) => console.error("Error fetching CSV:", error));
-    }
-    logMemoryUsage();
-    return () => {
-      localStorage.removeItem('animalData');
-    };
-  }, []);
   
   useEffect(()=>{
     if(!animalData) return;

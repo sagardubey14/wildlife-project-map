@@ -38,7 +38,7 @@ export default function Auth() {
     username: "",
     email: "",
     phone: "",
-    deptId: "",
+    deptId: "01",
     password: "",
     confirmPassword: "",
   });
@@ -492,12 +492,18 @@ export default function Auth() {
                     </div>
 
                     <div>
-                      <label>Dept ID</label>
-                      <Input
+                      <label>Dept ID :</label>
+                      <select
+                        className=" ml-2 p-1"
                         name="deptId"
                         value={registerData.deptId}
                         onChange={(e) => handleRegisterChange(e)}
-                      />
+                      >
+                        <option value="01">01</option>
+                        <option value="02">02</option>
+                        <option value="03">03</option>
+                        <option value="04">04</option>
+                      </select>
                     </div>
 
                     <div>

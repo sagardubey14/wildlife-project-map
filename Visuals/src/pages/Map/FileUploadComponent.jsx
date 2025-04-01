@@ -20,8 +20,8 @@ export default function FileUploadComponent({
   const [audioFile, setAudioFile] = useState(null);
   const [done, setDone] = useState(false);
   const { user } = useUser();
-  const {setAnimalData} = useDash();
-
+  const {animalData, setAnimalData} = useDash();
+  
   const handleSelectionChange = (value) => {
     setSelection(value);
     setImageFile(null);
